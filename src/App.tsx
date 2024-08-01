@@ -107,6 +107,7 @@ const App = () => {
         </div>
         <Content/>
       </div>
+      <small className={'block mb-4 text-center'}>&copy; 2020-{new Date().getFullYear()}. Ivatech.dev. YouTube Embed Code Generator.</small>
     </>
   )
 }
