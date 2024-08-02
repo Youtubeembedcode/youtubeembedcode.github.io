@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react'
+import {useEffect, useRef, useState} from 'react'
 import Content from "./components/Content.tsx";
 import getVideoId from 'get-video-id';
 import copy from 'copy-to-clipboard';
@@ -11,10 +11,13 @@ const App = () => {
   const [videoHeight, setVideoHeight] = useState<string>('315');
   const [embedString, setEmbedString] = useState<string>('');
   const [embedUrl, setEmbedUrl] = useState<string>('');
+  const [copyButtonClicked, setCopyButtonClicked] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
+  const videoEmbedCodeRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     setError('');
+    setCopyButtonClicked(false);
     generateEmbedCode();
   }, [videoUrl, videoWidth, videoHeight]);
 
@@ -32,6 +35,12 @@ const App = () => {
 
     return embedCode;
   }
+
+  const handleCopyClick = () => {
+    copy(embedString);
+    setCopyButtonClicked(true);
+    videoEmbedCodeRef.current?.select();
+  };
 
   return (
     <>
@@ -64,7 +73,7 @@ const App = () => {
                 defaultValue={'560'}
                 min={minVideoWidth}
                 //@ts-ignore
-                pattern="[0-9]*" inputmode="numeric"
+                pattern="[0-9]*" inputMode="numeric"
                 onChange={e => setVideoWidth(e.target.value)}/>
             </label>
             <label>
@@ -76,22 +85,20 @@ const App = () => {
                 min={minVideoHeight}
                 pattern="[0-9]*"
                 //@ts-ignore
-                inputmode="numeric"
+                inputMode="numeric"
                 onChange={e => setVideoHeight(e.target.value)}/>
             </label>
-
-            <div
-              className={'p-4 bg-gray-100 text-gray-400 overflow-hidden break-words'}>
-              {`<iframe width="${videoWidth === '' ? 560 : videoWidth}"
-                      height="${videoHeight === '' ? 315 : videoHeight}"
-                      src="${embedUrl}" title=""
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                      allowFullScreen></iframe>`}
-            </div>
+            <label>
+              <input
+                type="text"
+                ref={videoEmbedCodeRef}
+                name="video-embed-code"
+                value={embedString}
+              />
+            </label>
             <button
-              className={'px-4 py-2 rounded text-white bg-sky-600 transition-[background] hover:bg-sky-700 active:bg-green-600'}
-              onClick={() => copy(embedString)}>Copy
-              embed code
+              className={`px-4 py-2 rounded text-white ${copyButtonClicked ? 'bg-green-600' : 'bg-sky-600'} transition-[background] hover:bg-sky-700 active:bg-green-600`}
+              onClick={handleCopyClick}>{copyButtonClicked ? 'Copied!' : 'Copy embed code'}
             </button>
             {error && <div className={'text-red-500'}>{error}</div>}
           </div>
@@ -107,7 +114,9 @@ const App = () => {
         </div>
         <Content/>
       </div>
-      <small className={'block mb-4 text-center'}>&copy; 2020-{new Date().getFullYear()}. Ivatech.dev. YouTube Embed Code Generator.</small>
+      <small
+        className={'block mb-4 text-center'}>&copy; 2020-{new Date().getFullYear()}.
+        Ivatech.dev. YouTube Embed Code Generator.</small>
     </>
   )
 }
